@@ -1,25 +1,35 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import SockJsClient from 'react-stomp';
+
+// If WebSocket at server is configured with SockJs
+const SOCKET_URL = 'http://localhost:8080/ws-message';
 
 function App() {
+  const [message, setMessage] = useState('Your server message here.');
+
+  let onConnected = () => {
+    console.log("Connected!");
+  }
+
+  let onMessageReceived = (msg) => {
+    setMessage(msg.message);
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <SockJsClient
+        url={SOCKET_URL}
+        topics={['/topic/message']}
+        onConnected={onConnected}
+        onDisconnected={console.log("Disconnected!")}
+        onMessage={msg => onMessageReceived(msg)}
+        debug={false}
+      />
+      <div>{message}</div>
     </div>
   );
 }
 
 export default App;
+
+
